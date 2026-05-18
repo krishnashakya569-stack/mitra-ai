@@ -17,9 +17,8 @@ async function transcribeAudio(req, res) {
 
     const formData = new FormData();
     formData.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname || 'speech.webm');
-    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('model', 'whisper-large-v3');
     formData.append('response_format', 'json');
-    formData.append('language', 'en');
 
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
@@ -51,3 +50,4 @@ async function transcribeAudio(req, res) {
 }
 
 module.exports = { upload, transcribeAudio };
+
