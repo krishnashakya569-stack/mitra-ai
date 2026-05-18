@@ -15,10 +15,16 @@ async function transcribeAudio(req, res) {
       return res.status(400).json({ error: 'No audio file received.' });
     }
 
+    if (req.file.size < 1000) {
+      return res.status(400).json({ error: 'I could not hear enough audio. Please speak a little longer and try again.' });
+    }
+
     const formData = new FormData();
     formData.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname || 'speech.webm');
     formData.append('model', 'whisper-large-v3');
     formData.append('response_format', 'json');
+    formData.append('temperature', '0');
+    formData.append('prompt', 'The speaker may use English, Hindi, or Hinglish. Preserve the intended words naturally.');
 
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
@@ -33,7 +39,12 @@ async function transcribeAudio(req, res) {
       throw error;
     }
 
-    res.json({ text: data.text?.trim() || '' });
+    const text = data.text?.trim() || '';
+    if (!text) {
+      return res.status(422).json({ error: 'I could not hear that clearly. Please try again a little closer to the microphone.' });
+    }
+
+    res.json({ text });
   } catch (error) {
     console.error('Transcription error:', error);
 
@@ -50,4 +61,3 @@ async function transcribeAudio(req, res) {
 }
 
 module.exports = { upload, transcribeAudio };
-
