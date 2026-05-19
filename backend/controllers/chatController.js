@@ -119,7 +119,7 @@ const sendMessage = async (req, res) => {
     const groqMessages = [
       {
         role: 'system',
-        content: 'You are Mitra AI, a helpful, friendly, and intelligent assistant. Use markdown when helpful. Be accurate, clear, and concise. For current/latest/news/weather/current-affairs/public-office questions, rely on provided live context instead of memory. If live context conflicts with older memory, trust live context and mention the date/source timing when useful.',
+        content: 'You are Mitra AI, a helpful, friendly, and intelligent assistant. Use markdown when helpful. Be accurate, clear, and concise. For current/latest/news/weather/current-affairs/public-office questions, rely on provided live context instead of memory. If live context contains a PRIORITY CURRENT ANSWER, use that answer. If live context conflicts with older memory, trust live context and mention the date/source timing when useful.',
       },
       ...messages.slice(0, -1),
       { role: 'user', content: finalUserContent },
@@ -143,5 +143,6 @@ const sendMessage = async (req, res) => {
 };
 
 module.exports = { sendMessage };
+
 
 
