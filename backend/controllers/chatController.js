@@ -1,6 +1,7 @@
 ﻿const pdfParse = require('pdf-parse');
 const path = require('path');
 const { buildLiveContext } = require('../utils/liveContext');
+const { resolveChiefMinisterAnswer } = require('../utils/chiefMinisterContext');
 
 const TEXT_MODEL = 'llama-3.3-70b-versatile';
 const VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
@@ -100,6 +101,11 @@ const sendMessage = async (req, res) => {
     const attachment = decodeAttachment(req.body?.attachment);
     const { model, userContent } = await attachmentToPrompt(attachment);
     const latest = messages[messages.length - 1];
+
+    if (!attachment) {
+      const chiefMinisterAnswer = await resolveChiefMinisterAnswer(latest.content);
+      if (chiefMinisterAnswer) return res.json({ message: chiefMinisterAnswer });
+    }
     const liveContext = await buildLiveContext({ text: latest.content, location: req.body?.location });
 
     const userContentWithContext = [
@@ -143,6 +149,7 @@ const sendMessage = async (req, res) => {
 };
 
 module.exports = { sendMessage };
+
 
 
 

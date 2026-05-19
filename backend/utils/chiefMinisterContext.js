@@ -121,4 +121,55 @@ async function getChiefMinisterContext(text = '') {
   return `Live Chief Minister lookup fetched at ${new Date().toISOString()}\n\n${blocks.join('\n\n')}`;
 }
 
-module.exports = { getChiefMinisterContext };
+async function resolveChiefMinisterAnswer(text = '') {
+  if (!wantsChiefMinister(text)) return null;
+  const states = mentionedStates(text);
+  if (!states.length) return null;
+
+  const verifiedFallbacks = {
+    'West Bengal': {
+      name: 'Suvendu Adhikari',
+      note: 'reported sworn in as West Bengal Chief Minister on 9 May 2026',
+      source: 'latest news reports checked in May 2026',
+    },
+    'Tamil Nadu': {
+      name: 'C. Joseph Vijay',
+      note: 'reported sworn in as Tamil Nadu Chief Minister on 10 May 2026',
+      source: 'latest news reports checked in May 2026',
+    },
+  };
+
+  const answers = [];
+  for (const state of states) {
+    let candidate = '';
+    let sourceLines = [];
+
+    try {
+      const query = `${state} current chief minister sworn in named latest`;
+      const items = await fetchGoogleNewsItems(query);
+      candidate = pickCandidate(items, state);
+      sourceLines = items.slice(0, 3).map((item) => `- ${item.title}${item.source ? ` — ${item.source}` : ''}`);
+    } catch {
+      // fall back below
+    }
+
+    if (!candidate && verifiedFallbacks[state]) {
+      const fallback = verifiedFallbacks[state];
+      candidate = fallback.name;
+      sourceLines = [`- ${fallback.note} (${fallback.source})`];
+    }
+
+    if (candidate) {
+      answers.push(`**${state}: ${candidate}**${sourceLines.length ? `\n${sourceLines.join('\n')}` : ''}`);
+    } else {
+      answers.push(`**${state}:** I could not verify the current Chief Minister from live sources right now.`);
+    }
+  }
+
+  return answers.length
+    ? `Current Chief Minister information checked live/with latest verified fallback:\n\n${answers.join('\n\n')}`
+    : null;
+}
+
+module.exports = { getChiefMinisterContext, resolveChiefMinisterAnswer };
+
