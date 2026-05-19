@@ -76,7 +76,7 @@ async function callGroq({ model, messages }) {
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, temperature: 0.7, messages }),
+    body: JSON.stringify({ model, temperature: 0.3, messages }),
   });
 
   const data = await response.json();
@@ -119,7 +119,7 @@ const sendMessage = async (req, res) => {
     const groqMessages = [
       {
         role: 'system',
-        content: 'You are Mitra AI, a helpful, friendly, and intelligent assistant. Use markdown when helpful. Be accurate, clear, and concise. For live/news/weather/current-affairs questions, rely on provided live context and mention when data was fetched if useful.',
+        content: 'You are Mitra AI, a helpful, friendly, and intelligent assistant. Use markdown when helpful. Be accurate, clear, and concise. For current/latest/news/weather/current-affairs/public-office questions, rely on provided live context instead of memory. If live context conflicts with older memory, trust live context and mention the date/source timing when useful.',
       },
       ...messages.slice(0, -1),
       { role: 'user', content: finalUserContent },
@@ -143,3 +143,4 @@ const sendMessage = async (req, res) => {
 };
 
 module.exports = { sendMessage };
+
