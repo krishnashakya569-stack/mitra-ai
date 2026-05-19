@@ -1,11 +1,19 @@
 ﻿function wantsImageGeneration(text = '') {
-  return /\b(generate|create|make|draw|design)\b.*\b(image|picture|photo|wallpaper|poster|logo|art|illustration)\b/i.test(text) || /\b(image|picture|photo|wallpaper|poster|logo|art|illustration)\b.*\b(generate|create|make|draw|design)\b/i.test(text);
+  const t = text.toLowerCase();
+
+  const imageWords = /(image|picture|photo|wallpaper|poster|logo|artwork|art|illustration|avatar|thumbnail|banner|real image|real photo)/i;
+  const actionWords = /(generate|create|make|draw|design|show|give|want|need|real)/i;
+  const negativeWords = /(describe|explain|analyze|caption|what is in|ascii|text art)/i;
+
+  if (negativeWords.test(t) && !/(not ascii|real image|actual image|generate)/i.test(t)) return false;
+  return imageWords.test(t) && actionWords.test(t);
 }
 
 function cleanImagePrompt(text = '') {
   return text
-    .replace(/^(please\s+)?(generate|create|make|draw|design)\s+(an?|the)?\s*/i, '')
-    .replace(/\b(image|picture|photo|wallpaper|poster|art|illustration)\s+(of|for)?\s*/i, '')
+    .replace(/^(please\s+)?(i\s+)?(want|need|would like|show|give|generate|create|make|draw|design)\s+(me\s+)?(a|an|the)?\s*/i, '')
+    .replace(/\b(real|actual)\s+/gi, '')
+    .replace(/\b(image|picture|photo|wallpaper|poster|artwork|art|illustration|avatar|thumbnail|banner)\s+(of|for)?\s*/i, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -18,11 +26,11 @@ function buildImageMarkdown(text = '') {
   const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1024&height=1024&model=flux&nologo=true&private=true&seed=${Date.now()}`;
 
   return [
-    `Here is your generated image for: **${prompt}**`,
+    `Generating a real image for: **${prompt}**`,
     '',
-    `![Generated image: ${prompt}](${imageUrl})`,
+    `![Generated image](${imageUrl})`,
     '',
-    `[Open image](${imageUrl})`,
+    `If the preview takes a few seconds, open it here: [Open full image](${imageUrl})`,
   ].join('\n');
 }
 
